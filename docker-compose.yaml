@@ -1,0 +1,87 @@
+version: '3.7'
+
+services:
+  CURRENCY-EXCHANGE-SERVICE:
+    image: nazel7/ms-currencyexchange:0.0.1-SNAPSHOT
+    environment:
+      - EUREKA.CLIENT.SERVICEURL.DEFAULTZONE=http://SERVICE-REGISTRY:8761/eureka/
+      - SPRING.ZIPKIN.BASERURL=http://ZIPKIN-SERVER:9411/
+      - RABBIT_URI=amqp://guest:guest@RABBIT-MQ:5672
+      - SPRING_RABBITMQ_HOST=RABBIT-MQ
+      - SPRING_ZIPKIN_SENDER_TYPE=rabbit
+    mem_limit: 700m
+    ports:
+      - 8001:8001
+    networks:
+      - currency-network
+    depends_on:
+      - SERVICE-REGISTRY
+      - RABBIT-MQ
+
+  CURRENCY-CONVERSION-SERVICE:
+    image: nazel7/ms-currencyconversion:0.0.1-SNAPSHOT
+    environment:
+      - EUREKA.CLIENT.SERVICEURL.DEFAULTZONE=http://SERVICE-REGISTRY:8761/eureka/
+      - SPRING.ZIPKIN.BASERURL=http://ZIPKIN-SERVER:9411/
+      - RABBIT_URI=amqp://guest:guest@RABBIT-MQ:5672
+      - SPRING_RABBITMQ_HOST=RABBIT-MQ
+      - SPRING_ZIPKIN_SENDER_TYPE=rabbit
+    mem_limit: 700m
+    ports:
+    - 8100:8100
+    networks:
+      - currency-network
+    depends_on:
+      - SERVICE-REGISTRY
+      - RABBIT-MQ
+
+  API-GATEWAY:
+    image: nazel7/ms-api-gateway:0.0.1-SNAPSHOT
+    environment:
+      - EUREKA.CLIENT.SERVICEURL.DEFAULTZONE=http://SERVICE-REGISTRY:8761/eureka/
+      - SPRING.ZIPKIN.BASERURL=http://ZIPKIN-SERVER:9411/
+      - RABBIT_URI=amqp://guest:guest@RABBIT-MQ:5672
+      - SPRING_RABBITMQ_HOST=RABBIT-MQ
+      - SPRING_ZIPKIN_SENDER_TYPE=rabbit
+    mem_limit: 700m
+    ports:
+      - 8765:8765
+    networks:
+      - currency-network
+    depends_on:
+      - SERVICE-REGISTRY
+      - RABBIT-MQ
+
+  ZIPKIN-SERVER:
+    image: openzipkin/zipkin:2.23
+    environment:
+      - RABBIT_URI=amqp://guest:guest@RABBIT-MQ:5672
+    mem_limit: 300m
+    ports:
+      - 9411:9411
+    networks:
+      - currency-network
+    depends_on:
+      - RABBIT-MQ
+    restart: always
+
+  RABBIT-MQ:
+    image: rabbitmq:3.5.6-management
+    mem_limit: 300m
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - currency-network
+
+  SERVICE-REGISTRY:
+    image: nazel7/ms-service-registry:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+    - 8761:8761
+    networks:
+      - currency-network
+
+networks:
+  currency-network:
+

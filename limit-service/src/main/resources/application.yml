@@ -1,0 +1,21 @@
+server:
+  port: ${PORT:80}
+
+spring:
+  config:
+    import: ${CONFIG_SERVER}
+
+  application:
+    name: LIMIT-SERVICE
+  profiles:
+    active: dev
+  cloud:
+    config:
+      profile: dev
+      name: limits-service
+
+limit-service:
+  min: 1
+  max: 1000
+
+
