@@ -85,3 +85,4 @@ services:
 networks:
   currency-network:
 
+# You can always add the configserver service to this file as an exercise.
